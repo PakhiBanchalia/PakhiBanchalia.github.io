@@ -246,9 +246,7 @@ h1 {
   object-fit: cover;
   object-position: center top;
   border-radius: 12px;
-  /* warm monochrome: grayscale first, then tint back toward the paper so the
-     photo reads as printed on the page rather than pasted onto it */
-  filter: grayscale(1) sepia(0.32) contrast(1.03);
+  /* warm monochrome treatment is baked into the file, not applied here */
 }
 
 .intro-copy {
