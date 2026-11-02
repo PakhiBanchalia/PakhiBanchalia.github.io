@@ -1,51 +1,49 @@
 // Background music: "chocolate milk" by yawn., off until the visitor turns it on.
-// The speaker icon in the navbar opens a slim player strip and starts the song
-// from the top; clicking it again stops the song. YouTube's player does the
-// playing, hidden behind the album cover.
+// The speaker icon in the navbar drops down Spotify's little player and starts
+// the song from the top; clicking it again stops the song. (Spotify plays the
+// whole song for visitors signed in to Spotify, a short preview for everyone else.)
 (function () {
-  const VOLUME = 35;                 // 0–100: how loud the song plays
-  const VIDEO = "rz4atfBfcw8";
+  const TRACK = "spotify:track:5IBHUdEapfgKRPzxR2Amns";
 
   const speaker = document.querySelector(".sound");
   const card = document.getElementById("player");
   if (!speaker || !card) return;
-  let player = null, ready = false, queued = false;
+  let player = null, queued = false, started = 0;
 
   function playing(on) {
     speaker.setAttribute("aria-pressed", String(on));
-    speaker.setAttribute("aria-label", (on ? "Pause" : "Play") + " music: chocolate milk");
-    card.classList.toggle("is-playing", on);
+    speaker.setAttribute("aria-label", (on ? "Stop" : "Play") + " music: chocolate milk");
   }
   function open(on) {
     card.classList.toggle("open", on);
     card.setAttribute("aria-hidden", String(!on));
   }
 
-  window.onYouTubeIframeAPIReady = () => {
-    player = new YT.Player("yt", {
-      width: 200, height: 200, videoId: VIDEO,
-      playerVars: { controls: 0, playsinline: 1, rel: 0, disablekb: 1 },
-      events: {
-        onReady: () => { ready = true; player.setVolume(VOLUME); if (queued) fromTheTop(); },
-        onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) playing(true);
-          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) playing(false);
-        },
-      },
+  window.onSpotifyIframeApiReady = (api) => {
+    api.createController(document.getElementById("sp"), { uri: TRACK, width: "100%", height: 80 }, (c) => {
+      player = c;
+      // playing or pausing from inside Spotify's player shows or hides it too
+      // (but not in the first moment after the speaker starts the song)
+      c.addListener("playback_update", (e) => {
+        const on = !e.data.isPaused;
+        if (!on && Date.now() - started < 1500) return;
+        playing(on); open(on);
+      });
+      if (queued) fromTheTop();
     });
   };
   const s = document.createElement("script");
-  s.src = "https://www.youtube.com/iframe_api";
+  s.src = "https://open.spotify.com/embed/iframe-api/v1";
   s.async = true;
   document.head.appendChild(s);
 
-  function fromTheTop() { player.setVolume(VOLUME); player.seekTo(0, true); player.playVideo(); }
-  function stop() { if (ready) player.pauseVideo(); playing(false); open(false); queued = false; }
+  function fromTheTop() { player.seek(0); player.resume(); }
+  function stop() { if (player) player.pause(); playing(false); open(false); queued = false; }
 
-  // navbar speaker: on = open the strip and play from the start; off = stop and close
+  // navbar speaker: on = open the player and play from the start; off = stop and close
   speaker.addEventListener("click", () => {
     if (card.classList.contains("open")) return stop();
-    open(true); playing(true);
-    if (ready) fromTheTop(); else queued = true;
+    open(true); playing(true); started = Date.now();
+    if (player) fromTheTop(); else queued = true;
   });
 })();

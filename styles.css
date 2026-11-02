@@ -100,53 +100,31 @@ a { color: inherit; text-decoration: none; }
 .sound[aria-pressed="true"] { color: var(--accent); }
 
 
-/* Music player: a slim strip under the speaker with the album cover, the song,
-   Spotify / YouTube Music links. Shows while the music plays, and as a preview
-   when hovering the speaker. */
+/* Music player: Spotify's own compact player, dropping down under the speaker.
+   Shows while the music plays, and as a preview when hovering the speaker (or
+   tabbing to it). Clicks inside the player don't keep it up once the mouse leaves. */
 .music { position: relative; }
 .player {
   position: absolute;
   top: calc(100% + 10px);
   right: -6px;
   z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  width: 204px;
-  padding: 6px 10px 6px 6px;
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--paper) 70%, #fff);
-  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 14%, transparent);
+  width: min(300px, calc(100vw - 32px));
+  height: 80px;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 16%, transparent);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-6px);
   transform-origin: top right;
   transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.35s;
 }
-/* a see-through bridge so the mouse can travel from the speaker to the strip */
+/* a see-through bridge so the mouse can travel from the speaker to the player */
 .player::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 12px; }
 .player.open,
 .music:hover .player,
-.music:focus-within .player { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
-
-.player .cover { flex: none; width: 38px; height: 38px; border-radius: 8px; object-fit: cover; }
-/* YouTube's player does the playing, out of sight */
-.player .yt { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
-
-.player .meta { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-.player .meta p { margin: 0; }
-.player .title { font: 500 13px/1.2 var(--display); letter-spacing: -0.01em; color: var(--ink); white-space: nowrap; }
-.player .artist { font-size: 12px; line-height: 1.3; color: var(--soft); }
-.player .song { flex: 1; min-width: 0; }
-.player .open { display: flex; gap: 6px; }
-/* Spotify and YouTube Music: quiet until hovered, then their own colours */
-.player .open a { display: grid; color: var(--soft); transition: color 0.2s, transform 0.2s; }
-.player .open a svg { width: 15px; height: 15px; }
-.player .open a:hover { transform: translateY(-1px); }
-.player .open .spotify:hover { color: #1db954; }
-.player .open .ytm:hover { color: #ff0000; }
-
+.music:has(.sound:focus-visible) .player { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.player iframe { display: block; width: 100%; height: 80px; border: 0; border-radius: 12px; }
 
 /* One section per screen: each fills the window and its content sits in the
    middle; scrolling settles gently on the next one. The hero shares its

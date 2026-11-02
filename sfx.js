@@ -66,6 +66,7 @@
   // Every link click makes a sound: one for leaving the site, one for moving
   // around inside it. A link that loads another page of the site waits a beat
   // so the sound isn't cut off.
+  let rang = 0;   // when the name last ding-donged on hover
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a[href]");
     if (!a || e.defaultPrevented || e.button !== 0) return;
@@ -80,7 +81,9 @@
     const url = new URL(a.href, location.href);
     const external = url.origin !== location.origin || url.protocol === "mailto:";
     if (external) { window.sfx.away(); return; }
-    window.sfx.within();
+    // my name has its own sound: the ding-dong (unless hovering just rang it)
+    if (a.matches(".top .name")) { if (Date.now() - rang > 1500) window.sfx.dingdong(); }
+    else window.sfx.within();
     const samePage = url.pathname === location.pathname && url.hash;
     const newTab = a.target === "_blank" || e.metaKey || e.ctrlKey || e.shiftKey;
     if (!samePage && !newTab) {
@@ -91,7 +94,7 @@
 
   // My name in the corner: a soft "ding-dong" as it starts to rock.
   if (matchMedia("(hover: hover)").matches) {
-    document.querySelector(".top .name")?.addEventListener("mouseenter", () => window.sfx.dingdong());
+    document.querySelector(".top .name")?.addEventListener("mouseenter", () => { window.sfx.dingdong(); rang = Date.now(); });
   }
 
   // Work: a tick when an entry opens on hover (same short pause as the CSS,

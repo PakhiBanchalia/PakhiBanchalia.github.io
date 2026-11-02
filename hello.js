@@ -8,7 +8,7 @@
       if (e.target.closest("a")) return;   // links still just go where they go
       const open = !li.classList.contains("open");
       items.forEach((x) => x.classList.remove("open"));
-      if (open) li.classList.add("open");
+      if (open) { li.classList.add("open"); window.sfx?.tick(); }
     });
   });
 })();
