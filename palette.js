@@ -6,12 +6,14 @@
   if (!local) return;
 
   const PALETTES = [
-    ["off-white", "#faf9f6"], ["sage", "#e6ebe0"], ["deep-sage", "#d6dfcd"],
+    ["off-white", "#faf9f6"],
     ["baby-blue", "#e5eef6"], ["powder-blue", "#d6e5f1"], ["butter", "#f7f1dc"],
     ["blush", "#f6e8e5"], ["lavender", "#ebe8f4"], ["peach", "#f9e9de"],
     ["mint", "#e3f2eb"], ["oat", "#efebe3"],
     // mint paper with blush's raspberry accent: the swatch shows both
     ["mint-rose", "linear-gradient(135deg, #e3f2eb 50%, #b03c5c 50%)"],
+    ["blue-rose", "linear-gradient(135deg, #d6e5f1 50%, #b03c5c 50%)"],
+    ["sky-rose", "linear-gradient(135deg, #cde0f5 50%, #b03c5c 50%)"],
   ];
   // one saved choice per page, so home and archive can differ
   const KEY = "pakhi-palette:" + location.pathname.replace(/index\.html$/, "");

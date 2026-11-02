@@ -15,8 +15,6 @@
    palette to stay at 4.5:1 or better against the paper. */
 :root,
 [data-palette="off-white"]   { --paper: #faf9f6; --ink: #1d1c1a; --soft: #6c6862; --accent: #3c63d6; }
-[data-palette="sage"]        { --paper: #e6ebe0; --ink: #1f241d; --soft: #5c6657; --accent: #46663f; }
-[data-palette="deep-sage"]   { --paper: #d6dfcd; --ink: #1c2219; --soft: #525d4c; --accent: #3a5a34; }
 [data-palette="baby-blue"]   { --paper: #e5eef6; --ink: #1a2028; --soft: #566577; --accent: #2f5ea8; }
 [data-palette="powder-blue"] { --paper: #d6e5f1; --ink: #18202a; --soft: #4f6073; --accent: #24548f; }
 [data-palette="butter"]      { --paper: #f7f1dc; --ink: #262116; --soft: #6d6450; --accent: #b0522a; }
@@ -25,6 +23,8 @@
 [data-palette="peach"]       { --paper: #f9e9de; --ink: #2a1f19; --soft: #76604f; --accent: #a2421c; }
 [data-palette="mint"]        { --paper: #e3f2eb; --ink: #17231d; --soft: #53685d; --accent: #25775a; }
 [data-palette="mint-rose"]   { --paper: #e3f2eb; --ink: #17231d; --soft: #53685d; --accent: #b03c5c; }
+[data-palette="blue-rose"]   { --paper: #d6e5f1; --ink: #18202a; --soft: #4f6073; --accent: #b03c5c; }
+[data-palette="sky-rose"]    { --paper: #cde0f5; --ink: #18202a; --soft: #4d5f75; --accent: #b03c5c; }
 [data-palette="oat"]         { --paper: #efebe3; --ink: #221e19; --soft: #655d52; --accent: #7a4a2c; }
 
 :root { --line: color-mix(in srgb, var(--ink) 9%, transparent); }
