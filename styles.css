@@ -44,23 +44,50 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
+/* The navbar stays at the top as you scroll: it slips away while you scroll
+   down and comes back as soon as you scroll up (nav.js sets .hide). Once the
+   page has moved, it gets a foggy glass background. */
 .top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 8px 20px;
-  max-width: calc(var(--page) + 2 * var(--gutter));
-  margin: 0 auto;
-  padding: 24px var(--gutter);
+  /* full width for the glass, content lined up with the page column */
+  padding: 24px max(var(--gutter), calc((100% - var(--page)) / 2));
   font-size: 14px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* the glass is its own layer, so the menu (fixed) isn't trapped inside it */
+.top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+          backdrop-filter: blur(14px) saturate(1.3);
+  /* no edge: the fog thins out towards the bottom and melts into the page */
+  -webkit-mask: linear-gradient(to bottom, #000 55%, transparent);
+          mask: linear-gradient(to bottom, #000 55%, transparent);
+  bottom: -16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.top.scrolled::before { opacity: 1; }
+.top.hide { transform: translateY(-100%); }
+.top.hide .player { opacity: 0; }
+/* under the open menu the bar is see-through: the menu is the glass now */
+.top.menu-open::before { opacity: 0; }
 
 .top .name { display: block; white-space: nowrap; color: var(--accent); }
 /* my handwritten name, traced into a vector so it takes the palette's ink colour */
 .top .sig { display: block; height: 32px; width: auto; transform: rotate(-3deg); transform-origin: 50% 60%; }
-/* hover: rocks like a see-saw around its middle (one end up, then the other), then settles back to its tilt */
-.top .name:hover .sig, .top .name:focus-visible .sig { animation: name-swing 1.4s ease-in-out; }
+/* hover or tap (.swing, added by sfx.js so it always plays through): rocks like
+   a see-saw around its middle (one end up, then the other), then settles back to its tilt */
+.top .sig.swing, .top .name:focus-visible .sig { animation: name-swing 1.4s ease-in-out; }
 @keyframes name-swing {
   0%, 100% { transform: rotate(-3deg); }
   18% { transform: rotate(-10deg); }
@@ -68,10 +95,10 @@ a { color: inherit; text-decoration: none; }
   62% { transform: rotate(-7deg); }
   82% { transform: rotate(1deg); }
 }
-@media (prefers-reduced-motion: reduce) { .top .name:hover .sig { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .top .sig.swing { animation: none; } }
 .top nav { display: flex; gap: 24px; }
 .top nav a { color: var(--soft); transition: color 0.2s; }
-.top nav a:hover { color: var(--ink); }
+@media (hover: hover) { .top nav a:hover { color: var(--ink); } }
 .top nav { align-items: center; }
 /* same room above as the wave line has below, so the words sit level with the speaker */
 .top nav .wavy { padding-top: 5px; }
@@ -92,7 +119,7 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
 }
-.sound:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
+@media (hover: hover) { .sound:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); } }
 .sound:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sound .icon { grid-area: 1 / 1; width: 17px; height: 17px; }
 .sound .i-on, .sound[aria-pressed="true"] .i-off { display: none; }
@@ -122,7 +149,6 @@ a { color: inherit; text-decoration: none; }
 /* a see-through bridge so the mouse can travel from the speaker to the player */
 .player::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 12px; }
 .player.open,
-.music:hover .player,
 .music:has(.sound:focus-visible) .player { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
 .player iframe { display: block; width: 100%; height: 80px; border: 0; border-radius: 12px; }
 
@@ -294,9 +320,22 @@ img.pic-flip { animation: look 1s steps(1) infinite; }
   transform: scaleY(0);
   transition: transform 0.26s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.wavy:hover, .wavy:focus-visible { color: var(--ink); }
-.wavy.lined:hover, .wavy.lined:focus-visible { background-size: 100% 0; }
-.wavy:hover::after, .wavy:focus-visible::after { transform: scaleY(1); animation: wiggle 0.7s linear infinite; }
+.wavy:focus-visible { color: var(--ink); }
+.wavy.lined:focus-visible { background-size: 100% 0; }
+.wavy:focus-visible::after { transform: scaleY(1); animation: wiggle 0.7s linear infinite; }
+@media (hover: hover) {
+  .wavy:hover { color: var(--ink); }
+  .wavy.lined:hover { background-size: 100% 0; }
+  .wavy:hover::after { transform: scaleY(1); animation: wiggle 0.7s linear infinite; }
+  /* the speaker's player previews on hover (only where there's a real mouse:
+     on touch screens a hover state would swallow the first tap) */
+  .music:hover .player { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+}
+/* touch screens: no hover, so in-text links are simply wavy from the start */
+@media (hover: none) {
+  .wavy.lined { background-size: 100% 0; }
+  .wavy.lined::after { transform: scaleY(1); }
+}
 @keyframes wiggle {
   to { -webkit-mask-position: 8px 0; mask-position: 8px 0; }
 }
@@ -447,12 +486,15 @@ img.pic-tuck { margin-left: 0; }
   .roles li:hover a { --dot: var(--accent); }
 }
 /* the line sits exactly on the dots, same colour and height, so the gaps fill in */
-.roles a:hover, .roles a:focus-visible,
-.contact .links a:hover .t, .contact .links a:focus-visible .t { background-size: 100% 2px, 4px 2px; }
-.contact .links a:hover { color: var(--ink); }
+.roles a:focus-visible, .contact .links a:focus-visible .t { background-size: 100% 2px, 4px 2px; }
+/* touch screens keep just the dots */
+@media (hover: hover) {
+  .roles a:hover, .contact .links a:hover .t { background-size: 100% 2px, 4px 2px; }
+  .contact .links a:hover { color: var(--ink); }
+}
 @media (prefers-reduced-motion: reduce) { .roles a, .contact .links .t { transition: none; } }
 .roles .did a, .roles .refs a { color: inherit; }
-.roles .did a:hover, .roles .refs a:hover { color: var(--ink); }
+@media (hover: hover) { .roles .did a:hover, .roles .refs a:hover { color: var(--ink); } }
 
 /* Open: hovered (mouse), focused (keyboard) or tapped (touch, .open). */
 .roles li:has(:focus-visible) .more,
@@ -501,7 +543,7 @@ img.pic-tuck { margin-left: 0; }
 .contact .links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; font-size: 18px; }
 .contact .links a { color: var(--soft); transition: color 0.3s ease; }
 .foot a { color: var(--soft); transition: color 0.2s; }
-.contact .links a:hover, .foot a:hover { color: var(--ink); }
+@media (hover: hover) { .contact .links a:hover, .foot a:hover { color: var(--ink); } }
 
 /* Icons (all from Lucide): an arrow on links that open a new tab, a copy
    button beside the email. */
@@ -509,7 +551,7 @@ img.pic-tuck { margin-left: 0; }
 .contact .links a { display: inline-flex; align-items: center; gap: 3px; }
 .icon { width: 0.9em; height: 0.9em; flex: none; }
 .contact .links a .icon { opacity: 0.6; transition: transform 0.25s ease, opacity 0.2s; }
-.contact .links a:hover .icon { opacity: 1; transform: translate(2px, -2px); }
+@media (hover: hover) { .contact .links a:hover .icon { opacity: 1; transform: translate(2px, -2px); } }
 
 .contact .email { display: inline-flex; align-items: center; gap: 4px; }
 .copy {
@@ -526,7 +568,7 @@ img.pic-tuck { margin-left: 0; }
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
-.copy:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+@media (hover: hover) { .copy:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); } }
 .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .copy .icon { grid-area: 1 / 1; width: 16px; height: 16px; transition: opacity 0.2s, transform 0.2s; }
 .copy .i-done { opacity: 0; transform: scale(0.6); color: var(--accent); }
@@ -662,5 +704,73 @@ img.pic-tuck { margin-left: 0; }
 @media (max-width: 560px) {
   :root { --top-h: 72px; }
   .top { padding-top: 20px; padding-bottom: 20px; }
-  .top nav { gap: 14px; }
+  .top nav { gap: 6px; }
+  /* phones: just the speaker and the menu button; the links live in the menu */
+  .top nav > a { display: none; }
+  .sound { margin-left: 0; }
+  .top .burger { display: grid; }
+}
+
+/* Menu button: three lines that fold into a cross. */
+.burger {
+  display: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-right: -6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.burger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 50%; }
+.burger .icon { width: 22px; height: 22px; overflow: visible; }
+.burger line { transform-box: fill-box; transform-origin: center; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease; }
+.burger[aria-expanded="true"] .l1 { transform: translateY(6px) rotate(45deg); }
+.burger[aria-expanded="true"] .l2 { opacity: 0; transform: scaleX(0.2); }
+.burger[aria-expanded="true"] .l3 { transform: translateY(-6px) rotate(-45deg); }
+
+/* Phone menu: foggy glass over the whole screen, spreading out in a circle
+   from the menu button in the top right corner. Links one under another. */
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  padding: calc(var(--top-h) + 40px) var(--gutter) 40px;
+  background: color-mix(in srgb, var(--paper) 62%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+          backdrop-filter: blur(22px) saturate(1.3);
+  clip-path: circle(0 at calc(100% - var(--gutter) - 12px) calc(var(--top-h) / 2));
+  visibility: hidden;
+  transition: clip-path 0.6s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s linear 0.6s;
+}
+.menu.open {
+  clip-path: circle(150% at calc(100% - var(--gutter) - 12px) calc(var(--top-h) / 2));
+  visibility: visible;
+  transition: clip-path 0.7s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s;
+}
+.menu nav { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.menu a {
+  position: relative;
+  font: 500 40px/1.15 var(--display);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.menu a[aria-current="page"] { color: var(--accent); }
+/* the links rise in one after another once the circle is most of the way out */
+.menu.open a { opacity: 1; transform: none; transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+.menu.open a:nth-child(1) { transition-delay: 0.2s; }
+.menu.open a:nth-child(2) { transition-delay: 0.27s; }
+.menu.open a:nth-child(3) { transition-delay: 0.34s; }
+/* "coming soon" sits beside the word here, not above it */
+.menu .soon::before { left: calc(100% + 12px); bottom: auto; top: 50%; transform: translate(-4px, -50%); }
+.menu .soon.said::before { transform: translate(0, -50%); }
+@media (prefers-reduced-motion: reduce) {
+  .menu, .menu.open, .menu a, .burger line, .top { transition: none; }
 }

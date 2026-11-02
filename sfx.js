@@ -81,9 +81,18 @@
     const url = new URL(a.href, location.href);
     const external = url.origin !== location.origin || url.protocol === "mailto:";
     if (external) { window.sfx.away(); return; }
-    // my name has its own sound: the ding-dong (unless hovering just rang it)
-    if (a.matches(".top .name")) { if (Date.now() - rang > 1500) window.sfx.dingdong(); }
-    else window.sfx.within();
+    const home = (p) => p.replace(/index\.html$/, "");
+    // my name rocks and ding-dongs (unless hovering just did), all the way through:
+    // on the home page it scrolls back up instead of reloading, elsewhere it waits
+    // for the bell before going home
+    if (a.matches(".top .name")) {
+      e.preventDefault();
+      if (Date.now() - rang > 1500) ring();
+      if (home(url.pathname) === home(location.pathname)) scrollTo({ top: 0, behavior: "smooth" });
+      else setTimeout(() => { location.href = a.href; }, 900);
+      return;
+    }
+    window.sfx.within();
     const samePage = url.pathname === location.pathname && url.hash;
     const newTab = a.target === "_blank" || e.metaKey || e.ctrlKey || e.shiftKey;
     if (!samePage && !newTab) {
@@ -92,9 +101,20 @@
     }
   });
 
-  // My name in the corner: a soft "ding-dong" as it starts to rock.
+  // My name in the corner: a soft "ding-dong" as it starts to rock. The rocking
+  // is a class rather than :hover, so it always plays through.
+  function ring() {
+    const sig = document.querySelector(".top .sig");
+    if (sig) {
+      sig.classList.remove("swing"); void sig.offsetWidth;   // restart it
+      sig.classList.add("swing");
+      sig.addEventListener("animationend", () => sig.classList.remove("swing"), { once: true });
+    }
+    window.sfx.dingdong();
+    rang = Date.now();
+  }
   if (matchMedia("(hover: hover)").matches) {
-    document.querySelector(".top .name")?.addEventListener("mouseenter", () => { window.sfx.dingdong(); rang = Date.now(); });
+    document.querySelector(".top .name")?.addEventListener("mouseenter", () => { if (Date.now() - rang > 1500) ring(); });
   }
 
   // Work: a tick when an entry opens on hover (same short pause as the CSS,

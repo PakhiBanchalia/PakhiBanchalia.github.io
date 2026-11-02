@@ -8,7 +8,7 @@
   const speaker = document.querySelector(".sound");
   const card = document.getElementById("player");
   if (!speaker || !card) return;
-  let player = null, queued = false, started = 0;
+  let player = null, ready = false, queued = false, waiting = false;
 
   function playing(on) {
     speaker.setAttribute("aria-pressed", String(on));
@@ -22,14 +22,15 @@
   window.onSpotifyIframeApiReady = (api) => {
     api.createController(document.getElementById("sp"), { uri: TRACK, width: "100%", height: 80 }, (c) => {
       player = c;
+      c.addListener("ready", () => { ready = true; if (queued) fromTheTop(); });
       // playing or pausing from inside Spotify's player shows or hides it too
-      // (but not in the first moment after the speaker starts the song)
+      // (but while the speaker's song is still starting up, ignore "paused")
       c.addListener("playback_update", (e) => {
         const on = !e.data.isPaused;
-        if (!on && Date.now() - started < 1500) return;
+        if (on) waiting = false;
+        else if (waiting) return;
         playing(on); open(on);
       });
-      if (queued) fromTheTop();
     });
   };
   const s = document.createElement("script");
@@ -37,13 +38,13 @@
   s.async = true;
   document.head.appendChild(s);
 
-  function fromTheTop() { player.seek(0); player.resume(); }
-  function stop() { if (player) player.pause(); playing(false); open(false); queued = false; }
+  function fromTheTop() { queued = false; player.seek(0); player.resume(); }
+  function stop() { if (ready) player.pause(); playing(false); open(false); queued = waiting = false; }
 
   // navbar speaker: on = open the player and play from the start; off = stop and close
   speaker.addEventListener("click", () => {
     if (card.classList.contains("open")) return stop();
-    open(true); playing(true); started = Date.now();
-    if (player) fromTheTop(); else queued = true;
+    open(true); playing(true); waiting = true;
+    if (ready) fromTheTop(); else queued = true;
   });
 })();
