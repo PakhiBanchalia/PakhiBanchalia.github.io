@@ -22,6 +22,7 @@
 [data-palette="lavender"]    { --paper: #ebe8f4; --ink: #1f1d28; --soft: #625e75; --accent: #5a48b2; }
 [data-palette="peach"]       { --paper: #f9e9de; --ink: #2a1f19; --soft: #76604f; --accent: #a2421c; }
 [data-palette="mint"]        { --paper: #e3f2eb; --ink: #17231d; --soft: #53685d; --accent: #25775a; }
+[data-palette="mint-rose"]   { --paper: #e3f2eb; --ink: #17231d; --soft: #53685d; --accent: #b03c5c; }
 [data-palette="oat"]         { --paper: #efebe3; --ink: #221e19; --soft: #655d52; --accent: #7a4a2c; }
 
 :root { --line: color-mix(in srgb, var(--ink) 9%, transparent); }
@@ -53,10 +54,79 @@ a { color: inherit; text-decoration: none; }
   font-size: 14px;
 }
 
-.top .name { white-space: nowrap; }
+.top .name { display: block; white-space: nowrap; color: var(--accent); }
+/* my handwritten name, traced into a vector so it takes the palette's ink colour */
+.top .sig { display: block; height: 32px; width: auto; transform: rotate(-3deg); transform-origin: 50% 60%; }
+/* hover: rocks like a see-saw around its middle (one end up, then the other), then settles back to its tilt */
+.top .name:hover .sig, .top .name:focus-visible .sig { animation: name-swing 1.4s ease-in-out; }
+@keyframes name-swing {
+  0%, 100% { transform: rotate(-3deg); }
+  18% { transform: rotate(-10deg); }
+  40% { transform: rotate(5deg); }
+  62% { transform: rotate(-7deg); }
+  82% { transform: rotate(1deg); }
+}
+@media (prefers-reduced-motion: reduce) { .top .name:hover .sig { animation: none; } }
 .top nav { display: flex; gap: 24px; }
 .top nav a { color: var(--soft); transition: color 0.2s; }
 .top nav a:hover { color: var(--ink); }
+.top nav { align-items: center; }
+/* same room above as the wave line has below, so the words sit level with the speaker */
+.top nav .wavy { padding-top: 5px; }
+
+/* Music toggle: mic-off until playing. Hovering shows what's playing. */
+.sound {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: -6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--soft);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.sound:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.sound:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sound .icon { grid-area: 1 / 1; width: 17px; height: 17px; }
+.sound .i-on, .sound[aria-pressed="true"] .i-off { display: none; }
+.sound[aria-pressed="true"] .i-on { display: block; }
+.sound[aria-pressed="true"] { color: var(--accent); }
+.sound .now {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 12px var(--mono);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.sound:hover .now, .sound:focus-visible .now { opacity: 1; transform: none; }
+
+/* The Spotify player itself: off-screen until it's needed. */
+.player {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  width: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(calc(100% + 40px));
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.player.open { transform: none; }
 
 .canvas {
   /* One screen tall, but capped so very tall monitors don't get a wall of space. */
@@ -108,13 +178,8 @@ a { color: inherit; text-decoration: none; }
   font-size: clamp(17px, 1.6vw, 20px);
   line-height: 1.45;
   color: var(--soft);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.hello .what:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.hello .what.leaving { opacity: 0; transform: translateY(4px); }
 
 .hello .what s,
 .about s {
@@ -138,16 +203,7 @@ a { color: inherit; text-decoration: none; }
           drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.14));
 }
 
-/* Moving stickers. The cut-out sits still until clicked, then swings like a
-   wiper from its bottom edge: 1.2s per swing, 3 swings. The kitten looks
-   left and right. */
-.me img { transform-origin: 50% 100%; cursor: pointer; }
-.me img.swinging { animation: sway 1.2s ease-in-out 3; }
-@keyframes sway {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-4deg); }
-  75% { transform: rotate(4deg); }
-}
+/* Moving stickers. The kitten looks left and right. (My photo stays still.) */
 
 img.pic-flip { animation: look 1s steps(1) infinite; }
 @keyframes look {
@@ -156,7 +212,7 @@ img.pic-flip { animation: look 1s steps(1) infinite; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .me img, img.pic-flip { animation: none; }
+  img.pic-flip { animation: none; }
 }
 
 /* ── Sections below the fold ──────────────────────────── */
@@ -179,7 +235,6 @@ img.pic-flip { animation: look 1s steps(1) infinite; }
   letter-spacing: -0.03em;
 }
 
-.about { max-width: 60ch; }
 
 .about p {
   margin: 0 0 20px;
@@ -189,11 +244,55 @@ img.pic-flip { animation: look 1s steps(1) infinite; }
 
 .about p:last-child { color: var(--soft); }
 
-.about a {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 3px;
+/* Archive links while the archive is being built: a click shows "coming soon". */
+.soon::before {
+  content: "coming soon";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  padding: 4px 9px;
+  border-radius: 99px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 12px var(--mono);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.top .soon::before { bottom: auto; top: calc(100% + 8px); transform: translate(-50%, -4px); }
+.soon.said::before { opacity: 1; transform: translate(-50%, 0); }
+
+/* Links to other parts of the site. A straight line (only on .lined links)
+   turns into a wiggling wave on hover. The wave is a mask, so it takes the
+   current palette's accent colour. */
+.wavy { position: relative; padding-bottom: 5px; text-decoration: none; }
+.wavy.lined {
+  background: linear-gradient(var(--accent), var(--accent)) 0 calc(100% - 1.5px) / 100% 1.5px no-repeat;
+  transition: background-size 0.26s cubic-bezier(0.22, 0.8, 0.3, 1), color 0.2s;
+}
+.wavy::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath d='M0 2 Q2 0.4 4 2 T8 2' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 8px 4px repeat-x;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath d='M0 2 Q2 0.4 4 2 T8 2' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 8px 4px repeat-x;
+  transform: scaleY(0);
+  transition: transform 0.26s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.wavy:hover, .wavy:focus-visible { color: var(--ink); }
+.wavy.lined:hover, .wavy.lined:focus-visible { background-size: 100% 0; }
+.wavy:hover::after, .wavy:focus-visible::after { transform: scaleY(1); animation: wiggle 0.7s linear infinite; }
+@keyframes wiggle {
+  to { -webkit-mask-position: 8px 0; mask-position: 8px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wavy:hover::after, .wavy:focus-visible::after { animation: none; }
 }
 
 /* Little pictures that sit in the sentence. The placeholder chips become
@@ -291,63 +390,148 @@ img.pic-tuck { margin-left: 0; }
 
 .roles .entry { min-width: 0; }
 
-.roles .head {
-  display: block;
-  width: 100%;
-  padding: 1px 0 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.roles .head:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+.roles .head { padding-top: 1px; cursor: default; }
 
 .roles .org { display: block; font-weight: 500; font-size: 17px; color: var(--ink); }
 .roles .loc { font-weight: 400; color: var(--soft); }
 .roles .title { color: var(--soft); font-size: 15px; }
 
 /* What I did: folded to zero height, slides open. */
+/* Timing. Opening waits a beat (so skimming the mouse across the list doesn't
+   flash every entry), grows the space, then fades the text in. Closing fades
+   the text first, then folds away. */
+.roles {
+  --ease: cubic-bezier(0.33, 1, 0.68, 1);
+  --wait: 0.12s;
+}
 .roles .more {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  transition: grid-template-rows 0.45s var(--ease) 0.05s, opacity 0.2s ease;
 }
-.roles .did { min-height: 0; overflow: hidden; margin: 0; max-width: 54ch; color: var(--soft); font-size: 15px; }
-.roles .did::before { content: ""; display: block; height: 8px; }
+.roles .inner { min-height: 0; overflow: hidden; }
+.roles .inner > * { transform: translateY(-6px); transition: transform 0.3s ease; }
+.roles .did { margin: 0; padding-top: 8px; color: var(--soft); font-size: 15px; }
+.roles .refs { margin: 6px 0 2px; font-size: 14px; color: var(--soft); }
+/* Links out of the site: a dotted underline shows they're links; hovering one
+   joins the dots into a solid line, left to right. In Experience the dots only
+   appear once an entry opens; in Contact they're always there. */
+@property --dot {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+.roles a, .contact .links .t {
+  --dot: transparent;
+  padding-bottom: 2px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) left bottom / 0% 2px no-repeat,
+    radial-gradient(circle at 1px 1px, var(--dot) 0.9px, transparent 1.1px) left bottom / 4px 2px repeat-x;
+  transition: background-size 0.45s var(--ease), --dot 0.35s ease, color 0.3s ease;
+}
+.contact { --ease: cubic-bezier(0.33, 1, 0.68, 1); }
+.contact .links .t { --dot: var(--accent); }
+.roles li:has(:focus-visible) a,
+.roles li.open a { --dot: var(--accent); }
+@media (hover: hover) {
+  .roles li:hover a { --dot: var(--accent); }
+}
+/* the line sits exactly on the dots, same colour and height, so the gaps fill in */
+.roles a:hover, .roles a:focus-visible,
+.contact .links a:hover .t, .contact .links a:focus-visible .t { background-size: 100% 2px, 4px 2px; }
+.contact .links a:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .roles a, .contact .links .t { transition: none; } }
+.roles .did a, .roles .refs a { color: inherit; }
+.roles .did a:hover, .roles .refs a:hover { color: var(--ink); }
 
 /* Open: hovered (mouse), focused (keyboard) or tapped (touch, .open). */
-.roles li:has(.head:focus-visible) .more,
-.roles li.open .more { grid-template-rows: 1fr; opacity: 1; }
+.roles li:has(:focus-visible) .more,
+.roles li.open .more {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 0.55s var(--ease) var(--wait), opacity 0.45s ease calc(var(--wait) + 0.15s);
+}
+.roles li:has(:focus-visible) .inner > *,
+.roles li.open .inner > * { transform: none; transition: transform 0.55s var(--ease) calc(var(--wait) + 0.1s); }
 
 /* The others step back while one is open. */
-.roles li { transition: opacity 0.3s ease; }
-.roles:has(.head:focus-visible, li.open) li:not(:has(.head:focus-visible), .open) { opacity: 0.35; }
+.roles li { transition: opacity 0.4s ease; }
+.roles .title { transition: color 0.3s ease; }
+.roles:has(:focus-visible, li.open) li:not(:has(:focus-visible), .open) { opacity: 0.35; }
 
 @media (hover: hover) {
-  .roles li:hover .more { grid-template-rows: 1fr; opacity: 1; }
+  .roles li:hover .more {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition: grid-template-rows 0.55s var(--ease) var(--wait), opacity 0.45s ease calc(var(--wait) + 0.15s);
+  }
+  .roles li:hover .inner > * { transform: none; transition: transform 0.55s var(--ease) calc(var(--wait) + 0.1s); }
   .roles li:hover .title { color: var(--ink); }
-  .roles:has(li:hover) li:not(:hover) { opacity: 0.35; }
+  .roles:has(li:hover) li:not(:hover) { opacity: 0.35; transition: opacity 0.45s ease var(--wait); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .roles .more, .roles li { transition: none; }
+  .roles .more, .roles li, .roles .inner > *, .roles .title { transition: none !important; }
 }
 
 .contact .say {
-  margin: 0 0 18px;
+  margin: 0 0 10px;
   font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(40px, 6vw, 64px);
-  letter-spacing: -0.035em;
-  line-height: 1;
+  font-weight: 500;
+  font-size: clamp(26px, 3.2vw, 32px);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
+.contact .thanks { margin: 0 0 16px; font-size: 18px; line-height: 1.6; color: var(--soft); }
+/* heart: Phosphor, fill */
+.contact .thanks .ph-heart { width: 1em; height: 1em; vertical-align: -0.14em; color: var(--accent); }
+.contact .thanks:has(+ .reach) { margin-bottom: 4px; }
+.contact .thanks .mascot { width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
 .contact .links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; font-size: 18px; }
-.contact .links a, .foot a { color: var(--soft); transition: color 0.2s; }
+.contact .links a { color: var(--soft); transition: color 0.3s ease; }
+.foot a { color: var(--soft); transition: color 0.2s; }
 .contact .links a:hover, .foot a:hover { color: var(--ink); }
+
+/* Icons (all from Lucide): an arrow on links that open a new tab, a copy
+   button beside the email. */
+.contact .links { align-items: center; }
+.contact .links a { display: inline-flex; align-items: center; gap: 3px; }
+.icon { width: 0.9em; height: 0.9em; flex: none; }
+.contact .links a .icon { opacity: 0.6; transition: transform 0.25s ease, opacity 0.2s; }
+.contact .links a:hover .icon { opacity: 1; transform: translate(2px, -2px); }
+
+.contact .email { display: inline-flex; align-items: center; gap: 4px; }
+.copy {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--soft);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.copy:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.copy .icon { grid-area: 1 / 1; width: 16px; height: 16px; transition: opacity 0.2s, transform 0.2s; }
+.copy .i-done { opacity: 0; transform: scale(0.6); color: var(--accent); }
+.copy.done .i-copy { opacity: 0; transform: scale(0.6); }
+.copy.done .i-done { opacity: 1; transform: none; }
+/* "copied" is only for screen readers; sighted visitors get the tick */
+.copy .copied {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 .foot {
   display: flex;
@@ -363,6 +547,19 @@ img.pic-tuck { margin-left: 0; }
   color: var(--soft);
 }
 
+/* Archive, for now: under construction. */
+.construction { min-height: min(60svh, 560px); display: grid; align-content: center; justify-items: start; }
+.construction .pic { height: 72px; margin: 0 0 20px; transform: rotate(-4deg); }
+.construction h1 {
+  margin: 0 0 12px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(44px, 7vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.construction .lede { margin: 0; font-size: 18px; color: var(--soft); }
+
 /* ── Archive page ─────────────────────────────────────── */
 
 .archive-intro { padding-top: 96px; }
@@ -376,7 +573,7 @@ img.pic-tuck { margin-left: 0; }
   letter-spacing: -0.035em;
 }
 
-.archive-intro .lede { margin: 0 0 32px; max-width: 46ch; font-size: 18px; color: var(--soft); }
+.archive-intro .lede { margin: 0 0 32px; font-size: 18px; color: var(--soft); }
 
 .jump { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -411,6 +608,7 @@ img.pic-tuck { margin-left: 0; }
 
 @media (max-width: 720px) {
   :root { --gutter: 16px; }
+  .construction { min-height: 0; }
   .block { padding-top: 88px; padding-bottom: 24px; }
   /* phones: the year moves above the place name, the logo keeps its column */
   .roles { --logo: 38px; --gap: 14px; }
@@ -424,14 +622,31 @@ img.pic-tuck { margin-left: 0; }
   .ph-gallery { aspect-ratio: 4 / 3; }
 }
 
+/* The waving cat that sits right after "Hi" on phones. */
+.hello .wave-m { display: none; }
+
+/* Phones: "Hi 👋 / I'm Pakhi" and the line under it on the left, the photo
+   beside them. The hero no longer fills
+   the whole screen, so About shows up sooner. */
 @media (max-width: 560px) {
+  .canvas { min-height: 0; padding-top: 56px; padding-bottom: 24px; }
   .hello {
-    grid-template-columns: 1fr;
-    grid-template-areas: "me" "title" "what";
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title me" "what me";
     justify-items: start;
+    column-gap: 12px;
+    row-gap: 14px;
+    width: 100%;
   }
-  .me { width: 104px; }
-  .hello .wave { display: none; } /* the photo sits right above the heading here */
+  .hello h1 { font-size: clamp(40px, 12.5vw, 56px); align-self: start; }
+  .hello h1 .name { display: block; }
+  .hello h1 .comma { display: none; }
+  .hello .wave { display: none; }
+  .hello .wave-m { display: inline-block; height: 0.8em; width: auto; margin-left: 0.15em; vertical-align: -0.04em; }
+  /* the photo spans both rows and sets their height, so the words run the
+     photo's full length: "Hi" level with its top, the last line with its bottom */
+  .me { grid-row: 1 / span 2; width: clamp(110px, 36vw, 150px); align-self: stretch; display: flex; align-items: center; }
+  .hello .what { max-width: 22ch; font-size: 16px; align-self: end; }
 }
 
 @media (max-width: 560px) {
