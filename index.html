@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Geist:wght@400;500&family=Geist+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
   <script src="palette.js"></script>
-  <script src="hello.js" defer></script>
+  <script src="hello.js?v=2" defer></script>
 </head>
 <body>
   <header class="top">
@@ -24,51 +24,100 @@
 
   <main class="canvas">
     <div class="hello">
-      <h1>Hi, I'm Pakhi.</h1>
+      <h1>Hi, I'm Pakhi</h1>
+      <img class="wave pic-anim" src="assets/helou.webp" alt="" width="200" height="147">
       <figure class="me">
         <img src="assets/pakhi-cutout.png" alt="Pakhi, smiling, in a dark jacket" width="500" height="560">
       </figure>
-      <p class="what" id="what" role="button" tabindex="0" aria-live="polite" title="Click for another">I'm a <s>researcher</s> <s>builder</s> still deciding. Making things in the meantime.</p>
+      <p class="what" id="what" role="button" tabindex="0" aria-live="polite" title="Click for another">AI, products, design, in roughly that order.</p>
       <template id="what-lines">
+        <span>AI, products, design, in roughly that order.</span>
         <span>I'm a <s>researcher</s> <s>builder</s> still deciding. Making things in the meantime.</span>
         <span>Somewhere between AI, product and design. Usually building something.</span>
         <span>Drop me into something I don't know yet. Give me a few weeks.</span>
         <span>Still figuring out my job title. Pretty sure it involves making things.</span>
-        <span>AI, products, design, in roughly that order.</span>
       </template>
     </div>
   </main>
 
   <!-- Wireframe from here down: grey boxes stand in for real content. -->
   <section class="block" id="about">
-    <span class="sticker-ph right" style="top: 60px">sticker</span>
     <header class="block-head">
-      <p class="label">About</p>
-      <h2>The short version</h2>
+
+      <h2>A little about me</h2>
     </header>
     <div class="about">
-      <p>For the last couple of years I did research, mostly teaching agents to get hungry <span class="pic" aria-hidden="true"></span> at CMC Lab and Lossfunk. Lately I'd rather build things people use: <a href="#">Alignd</a> <span class="pic" aria-hidden="true"></span>, which finds sponsorships for creators, and a hospital inventory system <span class="pic" aria-hidden="true"></span> that's actually running.</p>
-      <p>Before all that I led design at amFOSS and redid <a href="#">amfoss.in</a> <span class="pic" aria-hidden="true"></span>. Now I'm somewhere between AI, product and design, and fine not picking yet.</p>
-      <p>Off the clock it's photos, songs on repeat and too many shows. That's all in the <a href="archive.html">archive</a>.</p>
+      <p>I am a <s>researcher</s> <s>builder</s> <em>sigh</em> still deciding<img class="pic pic-flip" src="assets/loading-cat.png" alt="An orange kitten with a loading spinner on its head" width="230" height="280">. Making things in the meantime. Currently based in Dresden.</p>
+      <p>For the last couple of years, I taught AI agents to survive based on just an internal drive, no external rewards. Now building products for people. Same curiosity, but now I get feedback in words, not reward curves.<img class="pic pic-tuck pic-anim" src="assets/michael-scott.webp" alt="Michael Scott grimacing" width="160" height="171"></p>
+      <p>More fun part of this site in the <a href="archive.html">archive</a>.</p>
     </div>
   </section>
 
   <section class="block" id="experience">
     <header class="block-head">
-      <p class="label">Experience</p>
+
       <h2>Where I've been</h2>
     </header>
     <ul class="roles">
-      <li><span class="when">2026</span><span class="what-role">Research intern</span><span class="where">Aalto University</span></li>
-      <li><span class="when">—</span><span class="what-role">Researcher</span><span class="where">Lossfunk</span></li>
-      <li><span class="when">—</span><span class="what-role">Independent research</span><span class="where">CMC Lab, TU Dresden</span></li>
-      <li><span class="when">2024</span><span class="what-role">Contributor</span><span class="where">Google Summer of Code, INCF</span></li>
-      <li><span class="when">2022–25</span><span class="what-role">Head of design, core committee</span><span class="where">amFOSS</span></li>
+      <li>
+        <span class="when">2026</span>
+        <span class="logo" aria-hidden="true"><img src="assets/logos/aalto.png" alt="" width="160" height="160"></span>
+        <div class="entry">
+          <button class="head" type="button" aria-expanded="false">
+            <span class="org">Aalto University <span class="loc">· Espoo, Finland</span></span>
+            <span class="title">Summer research intern</span>
+          </button>
+          <div class="more"><p class="did">Worked on empowerment-based assistance in multi-agent RL: giving an assistant a real body in the environment and measuring how that changes the help it can give.</p></div>
+        </div>
+      </li>
+      <li>
+        <span class="when">2025</span>
+        <span class="logo" aria-hidden="true"><img src="assets/logos/lossfunk.png" alt="" width="160" height="160"></span>
+        <div class="entry">
+          <button class="head" type="button" aria-expanded="false">
+            <span class="org">Lossfunk <span class="loc">· Bengaluru, India</span></span>
+            <span class="title">Research intern</span>
+          </button>
+          <div class="more"><p class="did">Built agents in Crafter that have to juggle hunger, energy and safety, and tested how different drives and rewards change the way they explore and survive.</p></div>
+        </div>
+      </li>
+      <li>
+        <span class="when">2024–26</span>
+        <span class="logo" aria-hidden="true"><img src="assets/logos/cmc.png" alt="" width="160" height="160"></span>
+        <div class="entry">
+          <button class="head" type="button" aria-expanded="false">
+            <span class="org">CMC Lab, TU Dresden <span class="loc">· Dresden, Germany</span></span>
+            <span class="title">Research intern, independent</span>
+          </button>
+          <div class="more"><p class="did">Designed RL agents with internal drives to see what they keep and generalise as their tasks change, then decoded movement and internal state from their network activity.</p></div>
+        </div>
+      </li>
+      <li>
+        <span class="when">2024</span>
+        <span class="logo" aria-hidden="true"><img src="assets/logos/incf.png" alt="" width="160" height="160"></span>
+        <div class="entry">
+          <button class="head" type="button" aria-expanded="false">
+            <span class="org">INCF <span class="loc">· Remote</span></span>
+            <span class="title">Google Summer of Code contributor</span>
+          </button>
+          <div class="more"><p class="did">Grew a worm embryo cell by cell with a graph neural cellular automaton, learning where each new cell sits in 3D as it divides. Also turned the embryo data into interactive maps, released as open-source code.</p></div>
+        </div>
+      </li>
+      <li>
+        <span class="when">2022–25</span>
+        <span class="logo" aria-hidden="true"><img src="assets/logos/amfoss.png" alt="" width="160" height="160"></span>
+        <div class="entry">
+          <button class="head" type="button" aria-expanded="false">
+            <span class="org">amFOSS <span class="loc">· Amritapuri, India</span></span>
+            <span class="title">Core committee member; Design lead</span>
+          </button>
+          <div class="more"><p class="did">Helped run a student open-source community: weekly project check-ins, nudging stalled work, and linking members with staff and the founder. Also led the design team, including the amfoss.in redesign.</p></div>
+        </div>
+      </li>
     </ul>
   </section>
 
   <section class="block contact" id="contact">
-    <span class="sticker-ph left" style="top: 60px">sticker</span>
     <p class="say">My inbox is open.</p>
     <p class="links"><a href="#">email</a><a href="#">github</a><a href="#">linkedin</a><a href="#">x</a></p>
   </section>

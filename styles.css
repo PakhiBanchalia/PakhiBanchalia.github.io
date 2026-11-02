@@ -89,6 +89,17 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.035em;
 }
 
+/* The waving cat perches on top of "Hi, I'm". It shares the heading's grid cell,
+   sits on the heading's bottom edge, then is lifted by exactly one heading-height. */
+.hello .wave {
+  grid-area: title;
+  justify-self: start;
+  align-self: end;
+  height: 44px;
+  width: auto;
+  transform: translate(52px, calc(-1 * clamp(48px, 8vw, 88px) - 2px));
+}
+
 .hello .what {
   grid-area: what;
   align-self: start;
@@ -105,7 +116,8 @@ a { color: inherit; text-decoration: none; }
 .hello .what:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .hello .what.leaving { opacity: 0; transform: translateY(4px); }
 
-.hello .what s {
+.hello .what s,
+.about s {
   text-decoration-thickness: 1.5px;
   text-decoration-color: var(--accent);
 }
@@ -126,6 +138,27 @@ a { color: inherit; text-decoration: none; }
           drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.14));
 }
 
+/* Moving stickers. The cut-out sits still until clicked, then swings like a
+   wiper from its bottom edge: 1.2s per swing, 3 swings. The kitten looks
+   left and right. */
+.me img { transform-origin: 50% 100%; cursor: pointer; }
+.me img.swinging { animation: sway 1.2s ease-in-out 3; }
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-4deg); }
+  75% { transform: rotate(4deg); }
+}
+
+img.pic-flip { animation: look 1s steps(1) infinite; }
+@keyframes look {
+  0% { transform: rotate(-3deg) scaleX(1); }
+  50% { transform: rotate(3deg) scaleX(-1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me img, img.pic-flip { animation: none; }
+}
+
 /* ── Sections below the fold ──────────────────────────── */
 
 .block {
@@ -136,14 +169,6 @@ a { color: inherit; text-decoration: none; }
 }
 
 .block-head { margin-bottom: 40px; }
-
-.label {
-  margin: 0 0 8px;
-  font: 12px var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--soft);
-}
 
 .block h2 {
   margin: 0;
@@ -185,20 +210,131 @@ a { color: inherit; text-decoration: none; }
 
 .pic:nth-of-type(even) { transform: rotate(3deg); }
 
-.roles { list-style: none; margin: 0; padding: 0; }
-
-.roles li {
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1fr) auto;
-  gap: 16px;
-  padding: 16px 0;
-  border-top: 1px solid var(--line);
+/* Cut-out stickers in a sentence: same white edge as the hero cut-out. */
+img.pic {
+  width: auto;
+  height: 1.7em;
+  margin: -0.25em 0.15em -0.25em 0.3em;
+  vertical-align: middle;
+  border: 0;
+  filter: drop-shadow(0 0 0 #fff) drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff)
+          drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.14));
 }
 
-.roles li:last-child { border-bottom: 1px solid var(--line); }
-.roles .when { font: 13px/1.9 var(--mono); color: var(--soft); }
-.roles .what-role { font-weight: 500; }
-.roles .where { color: var(--soft); text-align: right; }
+/* Animated stickers: white edge only. A soft shadow redraws every frame
+   as the outline changes, and reads as a shaky haze. */
+img.pic-anim {
+  filter: drop-shadow(0 0 0 #fff) drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff)
+          drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff);
+}
+
+/* For cut-outs with empty space beside the subject (shoulders reaching the edge). */
+img.pic-tuck { margin-left: 0; }
+
+/* Experience: year, logo, then place and title. Clicking the title opens what
+   I did there. A line runs between the logos, from one to the next. */
+.roles {
+  --logo: 44px;
+  --when: 72px;
+  --gap: 20px;
+  --row: 16px;          /* space above and below each entry */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.roles li {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--when) var(--logo) minmax(0, 1fr);
+  column-gap: var(--gap);
+  align-items: start;
+  padding: var(--row) 0;
+}
+
+/* the line: from just under this logo to just above the next one */
+.roles li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--when) + var(--gap) + var(--logo) / 2 - 1px);
+  top: calc(var(--row) + var(--logo) + 6px);
+  bottom: calc(6px - var(--row));
+  width: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.roles .when {
+  font: 13px/var(--logo) var(--mono);
+  color: var(--soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* App-icon style: white tile, hairline border, soft lift. */
+.roles .logo {
+  display: grid;
+  place-items: center;
+  width: var(--logo);
+  height: var(--logo);
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 10px rgba(0, 0, 0, 0.05);
+  font: 600 11px var(--mono);
+  color: var(--soft);
+}
+.roles .logo img { width: 100%; height: 100%; object-fit: cover; }
+
+
+
+.roles .entry { min-width: 0; }
+
+.roles .head {
+  display: block;
+  width: 100%;
+  padding: 1px 0 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.roles .head:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+
+.roles .org { display: block; font-weight: 500; font-size: 17px; color: var(--ink); }
+.roles .loc { font-weight: 400; color: var(--soft); }
+.roles .title { color: var(--soft); font-size: 15px; }
+
+/* What I did: folded to zero height, slides open. */
+.roles .more {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+.roles .did { min-height: 0; overflow: hidden; margin: 0; max-width: 54ch; color: var(--soft); font-size: 15px; }
+.roles .did::before { content: ""; display: block; height: 8px; }
+
+/* Open: hovered (mouse), focused (keyboard) or tapped (touch, .open). */
+.roles li:has(.head:focus-visible) .more,
+.roles li.open .more { grid-template-rows: 1fr; opacity: 1; }
+
+/* The others step back while one is open. */
+.roles li { transition: opacity 0.3s ease; }
+.roles:has(.head:focus-visible, li.open) li:not(:has(.head:focus-visible), .open) { opacity: 0.35; }
+
+@media (hover: hover) {
+  .roles li:hover .more { grid-template-rows: 1fr; opacity: 1; }
+  .roles li:hover .title { color: var(--ink); }
+  .roles:has(li:hover) li:not(:hover) { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roles .more, .roles li { transition: none; }
+}
 
 .contact .say {
   margin: 0 0 18px;
@@ -273,32 +409,16 @@ a { color: inherit; text-decoration: none; }
 .ph-poster { aspect-ratio: 2 / 3; }
 .ph-gallery { aspect-ratio: 16 / 7; }
 
-.sticker-ph {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 84px;
-  height: 84px;
-  border: 1.5px dashed color-mix(in srgb, var(--ink) 20%, transparent);
-  border-radius: 50%;
-  font: 11px var(--mono);
-  color: var(--soft);
-}
-
-.sticker-ph.left { left: -60px; transform: rotate(-8deg); }
-.sticker-ph.right { right: -60px; transform: rotate(7deg); }
-
-@media (max-width: 960px) {
-  .sticker-ph.left { left: 8px; }
-  .sticker-ph.right { right: 8px; }
-}
-
 @media (max-width: 720px) {
   :root { --gutter: 16px; }
   .block { padding-top: 88px; padding-bottom: 24px; }
-  .roles li { grid-template-columns: 1fr; gap: 2px; }
-  .roles .where { text-align: left; }
-  .sticker-ph { display: none; }
+  /* phones: the year moves above the place name, the logo keeps its column */
+  .roles { --logo: 38px; --gap: 14px; }
+  .roles li { grid-template-columns: var(--logo) minmax(0, 1fr); }
+  .roles li:not(:last-child)::after { left: calc(var(--logo) / 2 - 1px); }
+  .roles .when { grid-column: 2; grid-row: 1; text-align: left; line-height: 1.4; font-size: 12px; }
+  .roles .logo { grid-column: 1; grid-row: 1 / span 2; }
+  .roles .entry { grid-column: 2; grid-row: 2; }
   .shelf-songs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .shelf-posters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .ph-gallery { aspect-ratio: 4 / 3; }
@@ -311,6 +431,7 @@ a { color: inherit; text-decoration: none; }
     justify-items: start;
   }
   .me { width: 104px; }
+  .hello .wave { display: none; } /* the photo sits right above the heading here */
 }
 
 @media (max-width: 560px) {
