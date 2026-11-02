@@ -5,6 +5,8 @@
 
   /* One column for the whole site: header, sections and footer share it. */
   --page: 720px;
+  --top-h: 80px;    /* navbar height */
+  --foot-h: 88px;   /* footer height */
   --gutter: 32px;
 }
 
@@ -96,44 +98,66 @@ a { color: inherit; text-decoration: none; }
 .sound .i-on, .sound[aria-pressed="true"] .i-off { display: none; }
 .sound[aria-pressed="true"] .i-on { display: block; }
 .sound[aria-pressed="true"] { color: var(--accent); }
-.sound .now {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  padding: 5px 10px;
-  border-radius: 99px;
-  background: var(--ink);
-  color: var(--paper);
-  font: 12px var(--mono);
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition: opacity 0.2s, transform 0.2s;
-}
-.sound:hover .now, .sound:focus-visible .now { opacity: 1; transform: none; }
 
-/* The Spotify player itself: off-screen until it's needed. */
+
+/* Music player: a slim strip under the speaker with the album cover, the song,
+   Spotify / YouTube Music links. Shows while the music plays, and as a preview
+   when hovering the speaker. */
+.music { position: relative; }
 .player {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -6px;
   z-index: 50;
-  width: 300px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  transform: translateY(calc(100% + 40px));
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 204px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--paper) 70%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 14%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transform-origin: top right;
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.35s;
 }
-.player.open { transform: none; }
+/* a see-through bridge so the mouse can travel from the speaker to the strip */
+.player::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 12px; }
+.player.open,
+.music:hover .player,
+.music:focus-within .player { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
 
+.player .cover { flex: none; width: 38px; height: 38px; border-radius: 8px; object-fit: cover; }
+/* YouTube's player does the playing, out of sight */
+.player .yt { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+
+.player .meta { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.player .meta p { margin: 0; }
+.player .title { font: 500 13px/1.2 var(--display); letter-spacing: -0.01em; color: var(--ink); white-space: nowrap; }
+.player .artist { font-size: 12px; line-height: 1.3; color: var(--soft); }
+.player .song { flex: 1; min-width: 0; }
+.player .open { display: flex; gap: 6px; }
+/* Spotify and YouTube Music: quiet until hovered, then their own colours */
+.player .open a { display: grid; color: var(--soft); transition: color 0.2s, transform 0.2s; }
+.player .open a svg { width: 15px; height: 15px; }
+.player .open a:hover { transform: translateY(-1px); }
+.player .open .spotify:hover { color: #1db954; }
+.player .open .ytm:hover { color: #ff0000; }
+
+
+/* One section per screen: each fills the window and its content sits in the
+   middle; scrolling settles gently on the next one. The hero shares its
+   screen with the navbar, the contact section with the footer. */
+html { scroll-snap-type: y proximity; }
 .canvas {
-  /* One screen tall, but capped so very tall monitors don't get a wall of space. */
-  min-height: min(calc(100svh - 76px), 900px);
+  min-height: calc(100svh - var(--top-h));
   display: grid;
   place-items: center;
-  padding: 0 var(--gutter) min(12vh, 100px);
+  padding: 0 var(--gutter);
+  scroll-snap-align: end;
 }
 
 /* Hello: the heading and its cut-out share a row, the line sits under both. */
@@ -219,10 +243,17 @@ img.pic-flip { animation: look 1s steps(1) infinite; }
 
 .block {
   position: relative;
+  box-sizing: border-box;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: calc(var(--page) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 120px var(--gutter) 40px;
+  padding: 64px var(--gutter);
+  scroll-snap-align: start;
 }
+.block.contact { min-height: calc(100svh - var(--foot-h)); }
 
 .block-head { margin-bottom: 40px; }
 
@@ -539,8 +570,10 @@ img.pic-tuck { margin-left: 0; }
   flex-wrap: wrap;
   gap: 8px 24px;
   max-width: calc(var(--page) + 2 * var(--gutter));
-  margin: 96px auto 0;
+  margin: 0 auto;
   padding: 24px var(--gutter) 40px;
+  box-sizing: border-box;
+  min-height: var(--foot-h);
   /* A rule that stops at the column edges, not the window's. */
   background: linear-gradient(var(--line), var(--line)) var(--gutter) 0 / calc(100% - 2 * var(--gutter)) 1px no-repeat;
   font: 13px var(--mono);
@@ -548,7 +581,7 @@ img.pic-tuck { margin-left: 0; }
 }
 
 /* Archive, for now: under construction. */
-.construction { min-height: min(60svh, 560px); display: grid; align-content: center; justify-items: start; }
+.construction { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
 .construction .pic { height: 72px; margin: 0 0 20px; transform: rotate(-4deg); }
 .construction h1 {
   margin: 0 0 12px;
@@ -608,8 +641,7 @@ img.pic-tuck { margin-left: 0; }
 
 @media (max-width: 720px) {
   :root { --gutter: 16px; }
-  .construction { min-height: 0; }
-  .block { padding-top: 88px; padding-bottom: 24px; }
+  .block { padding-top: 48px; padding-bottom: 48px; }
   /* phones: the year moves above the place name, the logo keeps its column */
   .roles { --logo: 38px; --gap: 14px; }
   .roles li { grid-template-columns: var(--logo) minmax(0, 1fr); }
@@ -629,7 +661,7 @@ img.pic-tuck { margin-left: 0; }
    beside them. The hero no longer fills
    the whole screen, so About shows up sooner. */
 @media (max-width: 560px) {
-  .canvas { min-height: 0; padding-top: 56px; padding-bottom: 24px; }
+
   .hello {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: "title me" "what me";
@@ -650,6 +682,7 @@ img.pic-tuck { margin-left: 0; }
 }
 
 @media (max-width: 560px) {
+  :root { --top-h: 72px; }
   .top { padding-top: 20px; padding-bottom: 20px; }
   .top nav { gap: 14px; }
 }

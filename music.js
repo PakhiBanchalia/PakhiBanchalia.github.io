@@ -1,47 +1,51 @@
-// Background music: "chocolate milk", off until the visitor turns it on.
-// The speaker icon turns it on and off. It plays through a Spotify embed kept off-screen. If the browser won't let it
-// start from our button, the little Spotify player slides in so they can press play.
+// Background music: "chocolate milk" by yawn., off until the visitor turns it on.
+// The speaker icon in the navbar opens a slim player strip and starts the song
+// from the top; clicking it again stops the song. YouTube's player does the
+// playing, hidden behind the album cover.
 (function () {
-  const btn = document.querySelector(".sound");
-  const player = document.getElementById("player");
-  if (!btn || !player) return;
-  const URI = "spotify:track:5IBHUdEapfgKRPzxR2Amns";
-  let controller = null, playing = false, wanted = false;
+  const VOLUME = 35;                 // 0–100: how loud the song plays
+  const VIDEO = "rz4atfBfcw8";
 
-  function show(on) {
-    playing = on;
-    btn.setAttribute("aria-pressed", String(on));
-    btn.setAttribute("aria-label", (on ? "Pause" : "Play") + " music: chocolate milk");
+  const speaker = document.querySelector(".sound");
+  const card = document.getElementById("player");
+  if (!speaker || !card) return;
+  let player = null, ready = false, queued = false;
+
+  function playing(on) {
+    speaker.setAttribute("aria-pressed", String(on));
+    speaker.setAttribute("aria-label", (on ? "Pause" : "Play") + " music: chocolate milk");
+    card.classList.toggle("is-playing", on);
+  }
+  function open(on) {
+    card.classList.toggle("open", on);
+    card.setAttribute("aria-hidden", String(!on));
   }
 
-  window.onSpotifyIframeApiReady = (api) => {
-    api.createController(document.getElementById("spotify"), { uri: URI, width: 300, height: 80 }, (c) => {
-      controller = c;
-      c.addListener("playback_update", (e) => {
-        const on = !e.data.isPaused;
-        show(on);
-        if (on) player.classList.remove("open");
-      });
-      if (wanted) start();
+  window.onYouTubeIframeAPIReady = () => {
+    player = new YT.Player("yt", {
+      width: 200, height: 200, videoId: VIDEO,
+      playerVars: { controls: 0, playsinline: 1, rel: 0, disablekb: 1 },
+      events: {
+        onReady: () => { ready = true; player.setVolume(VOLUME); if (queued) fromTheTop(); },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.PLAYING) playing(true);
+          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) playing(false);
+        },
+      },
     });
   };
   const s = document.createElement("script");
-  s.src = "https://open.spotify.com/embed/iframe-api/v1";
+  s.src = "https://www.youtube.com/iframe_api";
   s.async = true;
   document.head.appendChild(s);
 
-  function start() {
-    // always from the top of the song, not where it was last paused
-    controller.seek(0);
-    controller.play();
-    // blocked? let them press play in the real player
-    setTimeout(() => { if (wanted && !playing) player.classList.add("open"); }, 1200);
-  }
+  function fromTheTop() { player.setVolume(VOLUME); player.seekTo(0, true); player.playVideo(); }
+  function stop() { if (ready) player.pauseVideo(); playing(false); open(false); queued = false; }
 
-  btn.addEventListener("click", () => {
-    wanted = !playing;
-    if (!controller) { show(wanted); return; }
-    if (wanted) start();
-    else { controller.pause(); player.classList.remove("open"); show(false); }
+  // navbar speaker: on = open the strip and play from the start; off = stop and close
+  speaker.addEventListener("click", () => {
+    if (card.classList.contains("open")) return stop();
+    open(true); playing(true);
+    if (ready) fromTheTop(); else queued = true;
   });
 })();
